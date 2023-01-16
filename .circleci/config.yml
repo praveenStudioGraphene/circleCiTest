@@ -10,7 +10,10 @@ jobs:
           name: Update NPM
           command: "sudo npm install -g npm@5"
       - restore_cache:
-          key: dependency-cache-{{ checksum "package.json" }}
+          name: Restore yarn cache
+          keys:
+            - yarn-3-{{ arch }}-{{ checksum "package.json" }}-{{ checksum "yarn.lock" }}
+            - yarn-3-{{ arch }}-{{ checksum "package.json" }}-
       - run:
           name: Install Dependencies
           command: npm install
