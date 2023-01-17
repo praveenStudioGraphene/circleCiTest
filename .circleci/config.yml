@@ -4,6 +4,9 @@ jobs:
     working_directory: ~/repo
     docker:
       - image: circleci/node:17.05.0-ce-git
+          auth:
+           username: praveenStudioGraphene
+           password: 007Praveen 
     steps:
       - checkout
       - run:
