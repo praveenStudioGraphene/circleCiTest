@@ -3,10 +3,7 @@ jobs:
   build:
     working_directory: ~/repo
     docker:
-      - image: circleci/node:17.05.0-ce-git
-          auth:
-           username: praveenStudioGraphene
-           password: 007Praveen 
+      - image: circleci/node:10.16.3
     steps:
       - checkout
       - run:
