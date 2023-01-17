@@ -8,7 +8,7 @@ dependencies:
     - yarn
   cache_directories:
     - ~/.cache/yarn
-    
+
 jobs:
   lint:
     executor: node-executor
@@ -20,7 +20,7 @@ jobs:
   build:
     working_directory: ~/repo
     docker:
-      - image: circleci/node:10.16.3
+      - image: cimg/base:stable
     steps:
       - checkout
       - run:
