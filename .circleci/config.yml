@@ -4,9 +4,6 @@ jobs:
     working_directory: ~/repo
     docker:
       - image: circleci/node:16.18.0
-        auth:
-          access_token: dckr_pat_MD5GaX7trQrHE_0jkNUQEtA5Bc8 
-          
     steps:
       - checkout
       - run:
