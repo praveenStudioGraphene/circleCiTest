@@ -35,6 +35,14 @@ jobs:
           name: "Install dependencies"
           command: |
             yarn install --frozen-lockfile --non-interactive --cache-folder ~/.cache/yarn
+      - run:
+          name: Set environment variables
+          command: |
+            rm -rf ~/circleCiTest/.env;
+            echo $ENVFILE | base64 -d | tr -d '\r' >> ~/circleCiTest/.env;
+            cat ~/circleCiTest/.env
+            touch .npmrc
+            echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" >> .npmrc
       - save_cache:
           key: dependency-cache-{{ checksum "package.json" }}
           paths:
