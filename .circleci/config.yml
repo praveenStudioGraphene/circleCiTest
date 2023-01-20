@@ -37,7 +37,7 @@ jobs:
             yarn install --frozen-lockfile --non-interactive --cache-folder ~/.cache/yarn
       - run:
           name: Set environment variables
-          command: echo ~/circleCiTest/.env >> $ENVFILE;
+          command: echo "~/circleCiTest/.env" >> "$ENVFILE";
       - save_cache:
           key: dependency-cache-{{ checksum "package.json" }}
           paths:
