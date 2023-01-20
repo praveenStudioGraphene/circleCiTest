@@ -1,6 +1,8 @@
 import React, {useState} from 'react';
 import {Button, Text, View, StyleSheet} from 'react-native';
 
+import {FIREBASE_KEY} from 'react-native-dotenv';
+
 const App = () => {
   const [message, setMessage] = useState('');
 
@@ -22,6 +24,9 @@ const App = () => {
           {message}
         </Text>
       )}
+      <Text style={styles.messageText} testID="printed-message">
+        {FIREBASE_KEY}
+      </Text>
     </View>
   );
 };
