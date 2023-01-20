@@ -41,6 +41,9 @@ jobs:
       - run: # print the name of the branch we're on
           name: "What branch am I on?"
           command: echo ${CIRCLE_BRANCH}
+      - run:
+          name: "Print an env var stored in a Context"
+          command: echo ${CONTEXT_ENV_VAR}
       - save_cache:
           key: dependency-cache-{{ checksum "package.json" }}
           paths:
