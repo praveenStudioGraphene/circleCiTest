@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "249850354409",
+    "project_id": "circlecitesting-d7986",
+    "storage_bucket": "circlecitesting-d7986.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:249850354409:android:80b4c1c342a199f6b36e78",
+        "android_client_info": {
+          "package_name": "com.circlecitest"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "249850354409-p17691cabquuiaqnsgmqlpc9gcf69thq.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC5jBfVvg1tNItMgXOYLMAXfg_Jhz3f_e0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "249850354409-p17691cabquuiaqnsgmqlpc9gcf69thq.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
