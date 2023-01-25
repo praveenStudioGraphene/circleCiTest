@@ -245,7 +245,7 @@ jobs:
 
 
 workflows:
-  version: 2
+  version: 2.1
   pull_request:
     jobs:
       - build:
