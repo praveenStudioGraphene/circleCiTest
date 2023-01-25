@@ -53,15 +53,47 @@ jobs:
           command: npm run test
 
 
-
 executors:
   android-executor:
     docker:
       - image: cimg/android:2022.12
     working_directory: ~/circleCiTest
 
+jobs:
+  lint:
+    executor: node-executor
+    steps:
+      - attach_workspace:
+          at: ~/
+      - run: yarn lint:ci
+      - run: yarn stylelint:ci
 
-android:
+  test:
+    executor: node-executor
+    steps:
+      - attach_workspace:
+          at: ~/
+      - run: yarn test:ci
+      - store_test_results:
+          path: test-results
+      - store_artifacts:
+          path: test-results
+
+  build:
+    executor: node-executor
+    environment:
+      DISABLE_ESLINT_PLUGIN: "true"
+      IMAGE_INLINE_SIZE_LIMIT: 0
+      INLINE_RUNTIME_CHUNK: "false"
+    steps:
+      - attach_workspace:
+          at: ~/
+      - run:
+          name: Run build
+          no_output_timeout: 20m
+          command: yarn build
+
+  android:
     executor: android-executor
     resource_class: large
     parameters:
@@ -226,16 +258,6 @@ workflows:
             - lint
             - build
       - android:
-          context: front-end-development
-          requires:
-            - hold
-          filters:
-            branches:
-              ignore:
-                - dev
-                - master
-                - /release\/.*/
-      - ios:
           context: front-end-development
           requires:
             - hold
