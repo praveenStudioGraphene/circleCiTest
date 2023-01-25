@@ -51,3 +51,232 @@ jobs:
       - run:
           name: Run tests
           command: npm run test
+
+
+
+executors:
+  android-executor:
+    docker:
+      - image: cimg/android:2022.12
+    working_directory: ~/circleCiTest
+
+
+android:
+    executor: android-executor
+    resource_class: large
+    parameters:
+      environment:
+        description: "Deployment environment name"
+        type: enum
+        enum: ["none", "dev", "production"]
+        default: "none"
+    steps:
+      - when:
+          condition:
+            equal: [<< parameters.environment >>, "none"]
+          steps:
+            - attach_workspace:
+                at: ~/
+      - unless:
+          condition:
+            equal: [<< parameters.environment >>, "none"]
+          steps:
+            - bootstrap:
+                os: "linux"
+      - run:
+          name: Set google-service.json
+          command: |
+            echo $FIREBASE_ANDROID > ./app/google-services.json
+          working_directory: android
+      - run:
+          name: Overwrite application name and version
+          command: |
+            if [ << parameters.environment >> = 'beryllium-development' ]; then
+              rpl canopyselva canopyselvaberylliumdev app/build.gradle
+              rpl app.canopy.rent "selva.beryllium.canopy.rent" app/src/main/AndroidManifest.xml
+              rpl canopyrenterapp "canopyrenterappberyllium" app/src/main/AndroidManifest.xml
+              rpl CircleCiTest "CircleCiTest Staging" app/src/main/res/values/strings.xml
+            elif [ << parameters.environment >> = 'dev' ]; then
+              rpl canopyselva canopyselvastag app/build.gradle
+              rpl canopyrenterapp "canopyrenterappstaging" app/src/main/AndroidManifest.xml
+              rpl CircleCiTest "CircleCiTest Dev" app/src/main/res/values/strings.xml
+            else
+              echo $SNAP_FIREBASE_ANDROID > app/google-services.json
+              rpl canopyselva canopyselvasnap app/build.gradle
+              rpl Canopy "Snap Canopy" app/src/main/res/values/strings.xml
+              rpl app.canopy.rent "selva.snap.canopy.rent" app/src/main/AndroidManifest.xml
+            fi
+          working_directory: android
+      - run:
+          name: Set production GTM
+          command: |
+            if [ << parameters.environment >> = 'production' ] || [ $(expr $CIRCLE_BRANCH : 'release\/selva-android.*') -gt 0 ]; then
+              rm -rf GTM-MMZ5JKP.json
+              touch GTM-KCRQFKL.json
+              echo $GTM_ANDROID > GTM-KCRQFKL.json
+            fi
+          working_directory: android/app/src/main/assets/containers
+      - run:
+          name: Set production Facebook AppID
+          command: |
+            if [ << parameters.environment >> = 'production' ] || [ $(expr $CIRCLE_BRANCH : 'release\/selva-android.*') -gt 0 ]; then
+              rpl 219187265551008 1867137223567195 ./strings.xml
+              rpl 3adc843fc86c01024ac80ed6a8e050d4 58c35f9a17814a0eb436b3d58dba0f96 ./strings.xml
+            fi
+          working_directory: android/app/src/main/res/values
+      - restore_cache:
+          name: Restore bundle cache
+          key: bundle-2-{{ arch }}-{{ checksum "android/Gemfile.lock" }}
+      - run:
+          name: Run bundle install
+          command: |
+            bundle config set path 'vendor/bundle'
+            bundle check || bundle install
+          working_directory: android
+      - save_cache:
+          name: Save bundle cache
+          key: bundle-2-{{ arch }}-{{ checksum "android/Gemfile.lock" }}
+          paths:
+            - android/vendor/bundle
+      - restore_cache:
+          name: Restore gradle wrapper cache
+          key: gradle-wrapper-2-{{ arch }}-{{ checksum "android/gradle/wrapper/gradle-wrapper.properties" }}
+      - restore_cache:
+          name: Restore gradle home cache
+          key: gradle-home-2-{{ arch }}-{{ checksum "android/build.gradle" }}-{{ checksum "android/app/build.gradle" }}-{{ checksum "android/settings.gradle" }}
+      - restore_cache:
+          name: Restore gradle build cache
+          key: gradle-build-2-{{ .Revision }}
+      - run:
+          name: Disperse gradle build caches for restoring
+          command: |
+            [ -d ~/gradle-build-caches ] &&
+            [ -n "$(ls -A ~/gradle-build-caches)" ] &&
+            rm -rf ~/.gradle/caches/build-cache-* &&
+            mkdir -p ~/.gradle/caches/ &&
+            mv ~/gradle-build-caches/* ~/.gradle/caches/ || true
+      - restore_cache:
+          name: Restore fastlane cache
+          key: fastlane-2-{{ arch }}
+      - run:
+          name: Fastlane
+          command: |
+            echo "sdk.dir=./androidsdk" > local.properties
+            if [ $(expr $CIRCLE_BRANCH : 'release\/selva-android.*') -gt 0 ]; then
+            	./gradlew gitVersion
+              bundle exec fastlane beta
+            elif [ << parameters.environment >> = 'dev' ]; then
+            	./gradlew gitVersion
+              bundle exec fastlane beta
+            else
+            	bundle exec fastlane build
+            fi
+          working_directory: android
+      - save_cache:
+          name: Save fastlane cache
+          key: fastlane-2-{{ arch }}
+          paths:
+            - ~/.fastlane
+      - save_cache:
+          name: Save gradle wrapper cache
+          key: gradle-wrapper-2-{{ arch }}-{{ checksum "android/gradle/wrapper/gradle-wrapper.properties" }}
+          paths:
+            - ~/.gradle/wrapper/
+      - save_cache:
+          name: Save gradle home cache
+          key: gradle-home-2-{{ arch }}-{{ checksum "android/build.gradle" }}-{{ checksum "android/app/build.gradle" }}-{{ checksum "android/settings.gradle" }}
+          paths:
+            - ~/.gradle/caches/
+      - run:
+          name: Collect gradle build caches for saving
+          command: |
+            mkdir -p ~/gradle-build-caches
+            [ -d ~/.gradle/caches ] &&
+            [ -n "$(ls -Ad ~/.gradle/caches/build-cache-* 2>/dev/null)" ] &&
+            rm -rf ~/gradle-build-caches/* &&
+            mv ~/.gradle/caches/build-cache-* ~/gradle-build-caches || true
+      - save_cache:
+          name: Saving gradle build cache
+          key: gradle-build-2-{{ .Revision }}
+          paths:
+            - ~/gradle-build-caches
+      - when:
+          condition:
+            equal: [<< parameters.environment >>, "production"]
+          steps:
+            - store_artifacts:
+                path: android/app/beta/outputs
+                destination: beta
+            - store_artifacts:
+                path: android/app/build/outputs
+                destination: build
+
+
+workflows:
+  version: 2
+  pull_request:
+    jobs:
+      - build:
+          requires:
+            - bootstrap
+      - hold:
+          type: approval
+          requires:
+            - bootstrap
+            - lint
+            - build
+      - android:
+          context: front-end-development
+          requires:
+            - hold
+          filters:
+            branches:
+              ignore:
+                - dev
+                - master
+                - /release\/.*/
+      - ios:
+          context: front-end-development
+          requires:
+            - hold
+          filters:
+            branches:
+              ignore:
+                - dev
+                - master
+                - /release\/.*/
+
+  deploy-dev:
+    jobs:
+      - android:
+          context: front-end-productions
+          environment: "developement"
+          filters:
+            branches:
+              only:
+                - dev
+      - ios:
+          context: front-end-productions
+          environment: "developement"
+          filters:
+            branches:
+              only:
+                - dev
+
+  release:
+    jobs:
+      - android:
+          context: front-end-productions
+          environment: "production"
+          filters:
+            branches:
+              only:
+                - /release\/selva-android.*/
+      - ios:
+          context: front-end-productions
+          environment: "production"
+          filters:
+            branches:
+              only:
+                - /release\/selva-ios.*/
+
