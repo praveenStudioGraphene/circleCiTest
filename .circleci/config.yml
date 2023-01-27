@@ -254,15 +254,6 @@ workflows:
   version: 2
   deploy:
     jobs:
-      - build:
-          requires:
-            - bootstrap
-      - hold:
-          type: approval
-          requires:
-            - bootstrap
-            - lint
-            - build
       - android:
           context: front-end-development
           requires:
