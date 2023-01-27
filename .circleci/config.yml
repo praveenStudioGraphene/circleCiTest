@@ -43,34 +43,23 @@ commands:
                     curl --silent --show-error -X POST https://circleci.com/api/v2/workflow/$CIRCLE_WORKFLOW_ID/cancel -H 'Accept: application/json' -u $CIRCLE_TOKEN':' > /dev/null
                   fi
       - checkout
-      - run:
-          name: Set environment variables
-          command: |
-            rm -rf ~/canopy-frontend/.env;
-            echo $ENVFILE | base64 -d | tr -d '\r' >> ~/canopy-frontend/.env;
-            cat ~/canopy-frontend/.env
-            touch .npmrc
-            echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" >> .npmrc
+      # - run:
+      #     name: Set environment variables
+      #     command: |
+      #       rm -rf ~/canopy-frontend/.env;
+      #       echo $ENVFILE | base64 -d | tr -d '\r' >> ~/canopy-frontend/.env;
+      #       cat ~/canopy-frontend/.env
+      #       touch .npmrc
+      #       echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" >> .npmrc
       - run:
           name: Log node version
           command: |
             node --version
-      # - run:
-      #     name: Create a hash of patches
-      #     command: |
-      #       if [[ << parameters.os >> = "linux" ]]; then
-      #         md5sum patches/* > patches.hash
-      #       elif [[ << parameters.os >> = "macOS" ]]; then
-      #         md5 patches/* > patches.hash
-      #       else
-      #         echo "Unknown operating system"
-      #       fi
       - restore_cache:
           name: Restore yarn cache
           keys:
             - yarn-3-{{ arch }}-{{ checksum "package.json" }}-{{ checksum "yarn.lock" }}
             - yarn-3-{{ arch }}-{{ checksum "package.json" }}-
-            # - yarn-3-{{ arch }}-{{ checksum "patches.hash" }}-
       - run:
           name: "Install dependencies"
           command: |
@@ -131,7 +120,6 @@ jobs:
       - attach_workspace:
           at: ~/
       - run: yarn lint:ci
-      - run: yarn stylelint:ci
 
   test:
     executor: node-executor
@@ -195,22 +183,12 @@ jobs:
               rpl canopyrenterapp "canopyrenterappberyllium" app/src/main/AndroidManifest.xml
               rpl app.canopy.rent selva.beryllium.canopy.rent app/src/main/res/values/strings.xml
               rpl Canopy "Canopy Beryllium" app/src/main/res/values/strings.xml
-            elif [ << parameters.environment >>  = 'boron-development' ]; then
-              rpl canopyselva canopyselvaborondev app/build.gradle
-              rpl app.canopy.rent "selva.boron.canopy.rent" app/src/main/AndroidManifest.xml
-              rpl go.canopy.rent "go.selva.boron.canopy.rent" app/src/main/AndroidManifest.xml
-              rpl canopyrenterapp "canopyrenterappboron" app/src/main/AndroidManifest.xml
-              rpl app.canopy.rent selva.boron.canopy.rent app/src/main/res/values/strings.xml
-              rpl Canopy "Canopy Boron" app/src/main/res/values/strings.xml
-            elif [ << parameters.environment >> = 'staging' ]; then
+            elif [ << parameters.environment >> = 'dev' ]; then
               rpl canopyselva canopyselvastag app/build.gradle
               rpl app.canopy.rent "selva.staging.canopy.rent" app/src/main/AndroidManifest.xml
               rpl go.canopy.rent "go.selva.staging.canopy.rent" app/src/main/AndroidManifest.xml
-              rpl canopyrenterapp "canopyrenterappstaging" app/src/main/AndroidManifest.xml
               rpl app.canopy.rent selva.staging.canopy.rent app/src/main/res/values/strings.xml
               rpl Canopy "Canopy Staging" app/src/main/res/values/strings.xml
-            elif [ << parameters.environment >> = 'production' ] || [ $(expr $CIRCLE_BRANCH : 'release\/selva-android.*') -gt 0 ]; then
-              echo "No changes"
             else
               echo $SNAP_FIREBASE_ANDROID > app/google-services.json
               rpl canopyselva canopyselvasnap app/build.gradle
