@@ -271,14 +271,14 @@ workflows:
   deploy-dev:
     jobs:
       - android:
-          context: front-end-productions
+          context: front-end-dev
           environment: "developement"
           filters:
             branches:
               only:
                 - dev
       - ios:
-          context: front-end-productions
+          context: front-end-dev
           environment: "developement"
           filters:
             branches:
