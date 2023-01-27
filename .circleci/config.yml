@@ -356,19 +356,8 @@ jobs:
               rpl -R "canopyrenterapp" "canopyrenterappberyllium" *
               rpl -R "canopyselva.page.link" "canopyselvaberylliumdev.page.link" *
               rpl -R Canopy "Canopy Beryllium" canopySelva
-            elif [ << parameters.environment >> = 'boron-development' ]; then
-              rpl -R "rent.canopy.selva" "rent.canopy.selva.boron.dev" *
-              rpl -R "app.canopy.rent" "selva.boron.canopy.rent" *
-              rpl -R "go.canopy.rent" "go.selva.boron.canopy.rent" *
-              rpl -R "canopyrenterapp" "canopyrenterappboron" *
-              rpl -R "canopyselva.page.link" "canopyselvaborondev.page.link" *
-              rpl -R Canopy "Canopy Boron" canopySelva
-            elif [ << parameters.environment >> = 'staging' ]; then
+            elif [ << parameters.environment >> = 'dev' ]; then
               rpl -R "rent.canopy.selva" "rent.canopy.selva.stag" *
-              rpl -R "app.canopy.rent" "selva.staging.canopy.rent" *
-              rpl -R "go.canopy.rent" "go.selva.staging.canopy.rent" *
-              rpl -R "canopyrenterapp" "canopyrenterappstaging" *
-              rpl -R "canopyselva.page.link" "canopyselvastag.page.link" *
               rpl -R Canopy "Canopy Staging" canopySelva
             elif [ << parameters.environment >> = 'production' ] || [ $(expr $CIRCLE_BRANCH : 'release\/selva-ios.*') -gt 0 ]; then
               echo "No changes required"
