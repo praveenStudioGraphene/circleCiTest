@@ -530,7 +530,7 @@ workflows:
     jobs:
       - android:
           context: development-dev
-          environment: "dev-development"
+          environment: "dev"
           filters:
             branches:
               only:
@@ -538,7 +538,7 @@ workflows:
 
       - ios:
           context: development-dev
-          environment: "dev-development"
+          environment: "dev"
           filters:
             branches:
               only:
