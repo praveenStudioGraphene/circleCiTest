@@ -249,10 +249,7 @@ jobs:
             elif [ << parameters.environment >> = 'production' ]; then
             	./gradlew gitVersion
               bundle exec fastlane beta
-            elif [ << parameters.environment >> = 'staging' ]; then
-            	./gradlew gitVersion
-              bundle exec fastlane beta
-            elif [ << parameters.environment >> = 'beryllium-development' ] || [ << parameters.environment >> = 'boron-development' ]; then
+            elif [ << parameters.environment >> = 'dev' ]; then
             	./gradlew gitVersion
               bundle exec fastlane beta
             else
@@ -304,10 +301,10 @@ jobs:
       environment:
         description: "Deployment environment name"
         type: enum
-        enum: ["none", "beryllium-development", "boron-development", "staging", "production"]
+        enum: ["none", "dev", "production"]
         default: "none"
     environment:
-      FL_OUTPUT_DIR: ~/canopy-frontend/output
+      FL_OUTPUT_DIR: ~/circleCiTest/output
       HOMEBREW_NO_AUTO_UPDATE: 1
     shell: /bin/bash --login -o pipefail
     steps:
