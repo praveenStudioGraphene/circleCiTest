@@ -9,55 +9,12 @@ dependencies:
   cache_directories:
     - ~/.cache/yarn
 
-# jobs:
-#   lint:
-#     executor: node-executor
-#     steps:
-#       - attach_workspace:
-#           at: ~/
-#       - run: yarn lint:ci
-#       - run: yarn stylelint:ci
-#   build:
-#     working_directory: ~/repo
-#     docker:
-#       - image: cimg/node:16.14
-#     steps:
-#       - checkout
-#       - run:
-#           name: Update NPM
-#           command: "sudo npm install -g npm@5"
-#       - restore_cache:
-#           name: Restore yarn cache
-#           keys:
-#             - yarn-3-{{ arch }}-{{ checksum "package.json" }}-{{ checksum "yarn.lock" }}
-#             - yarn-3-{{ arch }}-{{ checksum "package.json" }}-
-#       - run:
-#           name: "Install dependencies"
-#           command: |
-#             yarn install --frozen-lockfile --non-interactive --cache-folder ~/.cache/yarn
-#       # - run:
-#       #     name: Set environment variables
-#       #     command: echo 'export DEV_API_KEY="FOO"' >> "$BASH_ENV"
-#       # - run: # print the name of the branch we're on
-#       #     name: "What branch am I on?"
-#       #     command: echo ${CIRCLE_BRANCH}
-#       # - run:
-#       #     name: "Print an env var stored in a Context"
-#       #     command: echo ${CONTEXT_ENV_VAR}
-#       - save_cache:
-#           key: dependency-cache-{{ checksum "package.json" }}
-#           paths:
-#             - ./node_modules
-#       - run:
-#           name: Run tests
-#           command: npm run test
-
-
 executors:
   android-executor:
     docker:
       - image: cimg/android:2022.12
     working_directory: ~/circleCiTest
+
 
 jobs:
   lint:
@@ -80,18 +37,39 @@ jobs:
           path: test-results
 
   build:
-    executor: node-executor
-    environment:
-      DISABLE_ESLINT_PLUGIN: "true"
-      IMAGE_INLINE_SIZE_LIMIT: 0
-      INLINE_RUNTIME_CHUNK: "false"
+    working_directory: ~/repo
+    docker:
+      - image: cimg/node:16.14
     steps:
-      - attach_workspace:
-          at: ~/
+      - checkout
       - run:
-          name: Run build
-          no_output_timeout: 20m
-          command: yarn build
+          name: Update NPM
+          command: "sudo npm install -g npm@5"
+      - restore_cache:
+          name: Restore yarn cache
+          keys:
+            - yarn-3-{{ arch }}-{{ checksum "package.json" }}-{{ checksum "yarn.lock" }}
+            - yarn-3-{{ arch }}-{{ checksum "package.json" }}-
+      - run:
+          name: "Install dependencies"
+          command: |
+            yarn install --frozen-lockfile --non-interactive --cache-folder ~/.cache/yarn
+      # - run:
+      #     name: Set environment variables
+      #     command: echo 'export DEV_API_KEY="FOO"' >> "$BASH_ENV"
+      # - run: # print the name of the branch we're on
+      #     name: "What branch am I on?"
+      #     command: echo ${CIRCLE_BRANCH}
+      # - run:
+      #     name: "Print an env var stored in a Context"
+      #     command: echo ${CONTEXT_ENV_VAR}
+      - save_cache:
+          key: dependency-cache-{{ checksum "package.json" }}
+          paths:
+            - ./node_modules
+      - run:
+          name: Run tests
+          command: npm run test
 
   android:
     executor: android-executor
@@ -242,6 +220,34 @@ jobs:
             - store_artifacts:
                 path: android/app/build/outputs
                 destination: build
+
+
+
+# jobs:
+#   lint:
+#     executor: node-executor
+#     steps:
+#       - attach_workspace:
+#           at: ~/
+#       - run: yarn lint:ci
+#       - run: yarn stylelint:ci
+
+
+
+#   build:
+#     executor: node-executor
+#     environment:
+#       DISABLE_ESLINT_PLUGIN: "true"
+#       IMAGE_INLINE_SIZE_LIMIT: 0
+#       INLINE_RUNTIME_CHUNK: "false"
+#     steps:
+#       - attach_workspace:
+#           at: ~/
+#       - run:
+#           name: Run build
+#           no_output_timeout: 20m
+#           command: yarn build
+
 
 
 workflows:
