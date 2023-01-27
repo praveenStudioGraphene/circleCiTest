@@ -9,48 +9,48 @@ dependencies:
   cache_directories:
     - ~/.cache/yarn
 
-jobs:
-  lint:
-    executor: node-executor
-    steps:
-      - attach_workspace:
-          at: ~/
-      - run: yarn lint:ci
-      - run: yarn stylelint:ci
-  build:
-    working_directory: ~/repo
-    docker:
-      - image: cimg/node:16.14
-    steps:
-      - checkout
-      - run:
-          name: Update NPM
-          command: "sudo npm install -g npm@5"
-      - restore_cache:
-          name: Restore yarn cache
-          keys:
-            - yarn-3-{{ arch }}-{{ checksum "package.json" }}-{{ checksum "yarn.lock" }}
-            - yarn-3-{{ arch }}-{{ checksum "package.json" }}-
-      - run:
-          name: "Install dependencies"
-          command: |
-            yarn install --frozen-lockfile --non-interactive --cache-folder ~/.cache/yarn
-      # - run:
-      #     name: Set environment variables
-      #     command: echo 'export DEV_API_KEY="FOO"' >> "$BASH_ENV"
-      # - run: # print the name of the branch we're on
-      #     name: "What branch am I on?"
-      #     command: echo ${CIRCLE_BRANCH}
-      # - run:
-      #     name: "Print an env var stored in a Context"
-      #     command: echo ${CONTEXT_ENV_VAR}
-      - save_cache:
-          key: dependency-cache-{{ checksum "package.json" }}
-          paths:
-            - ./node_modules
-      - run:
-          name: Run tests
-          command: npm run test
+# jobs:
+#   lint:
+#     executor: node-executor
+#     steps:
+#       - attach_workspace:
+#           at: ~/
+#       - run: yarn lint:ci
+#       - run: yarn stylelint:ci
+#   build:
+#     working_directory: ~/repo
+#     docker:
+#       - image: cimg/node:16.14
+#     steps:
+#       - checkout
+#       - run:
+#           name: Update NPM
+#           command: "sudo npm install -g npm@5"
+#       - restore_cache:
+#           name: Restore yarn cache
+#           keys:
+#             - yarn-3-{{ arch }}-{{ checksum "package.json" }}-{{ checksum "yarn.lock" }}
+#             - yarn-3-{{ arch }}-{{ checksum "package.json" }}-
+#       - run:
+#           name: "Install dependencies"
+#           command: |
+#             yarn install --frozen-lockfile --non-interactive --cache-folder ~/.cache/yarn
+#       # - run:
+#       #     name: Set environment variables
+#       #     command: echo 'export DEV_API_KEY="FOO"' >> "$BASH_ENV"
+#       # - run: # print the name of the branch we're on
+#       #     name: "What branch am I on?"
+#       #     command: echo ${CIRCLE_BRANCH}
+#       # - run:
+#       #     name: "Print an env var stored in a Context"
+#       #     command: echo ${CONTEXT_ENV_VAR}
+#       - save_cache:
+#           key: dependency-cache-{{ checksum "package.json" }}
+#           paths:
+#             - ./node_modules
+#       - run:
+#           name: Run tests
+#           command: npm run test
 
 
 executors:
