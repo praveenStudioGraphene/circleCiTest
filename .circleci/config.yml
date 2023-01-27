@@ -252,7 +252,7 @@ jobs:
 
 workflows:
   version: 2
-  pull_request:
+  deploy:
     jobs:
       - build:
           requires:
