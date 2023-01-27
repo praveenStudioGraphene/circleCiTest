@@ -526,7 +526,7 @@ workflows:
                 - master
                 - /release\/.*/
 
-  deploy-development-dev:
+  dev:
     jobs:
       - android:
           context: development-dev
