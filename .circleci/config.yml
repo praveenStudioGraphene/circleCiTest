@@ -69,7 +69,7 @@ commands:
           key: yarn-3-{{ arch }}-{{ checksum "package.json" }}-{{ checksum "yarn.lock" }}
           paths:
             - ~/.cache/yarn
-            - ~/canopy-frontend/node_modules
+            - ~/circleCiTest/node_modules
       - when:
           condition: << parameters.remove-git >>
           steps:
@@ -82,15 +82,15 @@ executors:
   node-executor:
     docker:
       - image: cimg/node:16.14
-    working_directory: ~/canopy-frontend
+    working_directory: ~/circleCiTest
   android-executor:
     docker:
       - image: findyourcanopy/buildfrontenv:android
-    working_directory: ~/canopy-frontend
+    working_directory: ~/circleCiTest
   ios-executor:
     macos:
       xcode: "13.3.0"
-    working_directory: ~/canopy-frontend
+    working_directory: ~/circleCiTest
 
 jobs:
   bootstrap:
@@ -112,7 +112,7 @@ jobs:
       - persist_to_workspace:
           root: ~/
           paths:
-            - canopy-frontend
+            - circleCiTest
 
   lint:
     executor: node-executor
@@ -153,7 +153,7 @@ jobs:
       environment:
         description: "Deployment environment name"
         type: enum
-        enum: ["none", "beryllium-development", "boron-development", "staging", "production"]
+        enum: ["none", "dev", "production"]
         default: "none"
     steps:
       - when:
@@ -176,19 +176,10 @@ jobs:
       - run:
           name: Overwrite application name and version
           command: |
-            if [ << parameters.environment >> = 'beryllium-development' ]; then
+            if [ << parameters.environment >> = 'dev' ]; then
               rpl canopyselva canopyselvaberylliumdev app/build.gradle
-              rpl app.canopy.rent "selva.beryllium.canopy.rent" app/src/main/AndroidManifest.xml
               rpl go.canopy.rent "go.selva.beryllium.canopy.rent" app/src/main/AndroidManifest.xml
-              rpl canopyrenterapp "canopyrenterappberyllium" app/src/main/AndroidManifest.xml
-              rpl app.canopy.rent selva.beryllium.canopy.rent app/src/main/res/values/strings.xml
-              rpl Canopy "Canopy Beryllium" app/src/main/res/values/strings.xml
-            elif [ << parameters.environment >> = 'dev' ]; then
-              rpl canopyselva canopyselvastag app/build.gradle
-              rpl app.canopy.rent "selva.staging.canopy.rent" app/src/main/AndroidManifest.xml
-              rpl go.canopy.rent "go.selva.staging.canopy.rent" app/src/main/AndroidManifest.xml
-              rpl app.canopy.rent selva.staging.canopy.rent app/src/main/res/values/strings.xml
-              rpl Canopy "Canopy Staging" app/src/main/res/values/strings.xml
+              rpl CircleCiTest "CircleCiTest Dev" app/src/main/res/values/strings.xml
             else
               echo $SNAP_FIREBASE_ANDROID > app/google-services.json
               rpl canopyselva canopyselvasnap app/build.gradle
@@ -484,22 +475,6 @@ jobs:
           name: Save SPM cache
           paths:
             - ios/SourcePackages
-      # Temporary disable artifacts
-      # - store_artifacts:
-      #     path: /Users/distiller/driver-application/buildlogs/gym/DriverApplication-DriverApplication.log
-      #     destination: buildlogs
-      # - store_artifacts:
-      #     path: ios/release
-      #     destination: release
-      # - store_artifacts:
-      #     path: ios/beta
-      #     destination: beta
-      # - store_artifacts:
-      #     path: ios/build
-      #     destination: build
-      # - store_artifacts:
-      #     path: output
-      #     destination: output
 
 workflows:
   version: 2
@@ -513,8 +488,7 @@ workflows:
               only:
                 - /^(?!pull\/).*$/
               ignore:
-                - staging
-                - master
+                - dev
                 - /release\/.*/
       - lint:
           requires:
@@ -530,7 +504,6 @@ workflows:
           requires:
             - bootstrap
             - lint
-            # - test
             - build
       - android:
           context: front-end-development
@@ -553,74 +526,23 @@ workflows:
                 - master
                 - /release\/.*/
 
-  deploy-development-beryllium:
+  deploy-development-dev:
     jobs:
       - android:
-          context: selva-development-beryllium
-          environment: "beryllium-development"
+          context: development-dev
+          environment: "dev-development"
           filters:
             branches:
               only:
-                - release/2.125.0
-      - ios:
-          context: selva-development-beryllium
-          environment: "beryllium-development"
-          filters:
-            branches:
-              only:
-                - release/2.125.0
-
-  deploy-development-boron:
-    jobs:
-      - android:
-          context: selva-development-boron
-          environment: "boron-development"
-          filters:
-            branches:
-              only:
-                - release/2.124.0
+                - dev
 
       - ios:
-          context: selva-development-boron
-          environment: "boron-development"
+          context: development-dev
+          environment: "dev-development"
           filters:
             branches:
               only:
-                - release/2.124.0
-
-  deploy-staging:
-    jobs:
-      - android:
-          context: front-end-staging
-          environment: "staging"
-          filters:
-            branches:
-              only:
-                - staging
-      - ios:
-          context: front-end-staging
-          environment: "staging"
-          filters:
-            branches:
-              only:
-                - staging
-
-  deploy-production:
-    jobs:
-      - android:
-          context: front-end-productions
-          environment: "production"
-          filters:
-            branches:
-              only:
-                - master
-      - ios:
-          context: front-end-productions
-          environment: "production"
-          filters:
-            branches:
-              only:
-                - master
+                - dev
 
   release:
     jobs:
