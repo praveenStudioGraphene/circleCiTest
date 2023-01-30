@@ -33,7 +33,7 @@ platform :android do
 
     firebase_app_distribution(
       app: "1:249850354409:android:80b4c1c342a199f6b36e78",
-      groups: "praveen@studiographene.com",
+      testers: "praveen@studiographene.com",
       firebase_cli_path: "/usr/local/bin/firebase",
       firebase_cli_token: "1//0cKQQoicKG6HsCgYIARAAGAwSNwF-L9Irc81rFn1bB1dQiQ2dSZAiA_Ma-gh97TBbymUfIQa3IoLoiA3kO2cqonmSccXEbeDMUNo"
   )
