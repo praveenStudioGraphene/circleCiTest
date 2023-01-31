@@ -6,10 +6,13 @@
     "android": "react-native run-android",
     "ios": "react-native run-ios",
     "lint": "eslint .",
+    "lint:ci": "eslint \"src/**/*.{js,jsx}\"",
     "start": "react-native start",
     "test": "jest"
   },
   "dependencies": {
+    "@react-native-firebase/app": "^16.5.1",
+    "@react-native-firebase/app-distribution": "^16.5.1",
     "@testing-library/react-native": "^11.5.0",
     "react": "18.2.0",
     "react-native": "0.71.0",

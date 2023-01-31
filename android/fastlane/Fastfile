@@ -1,0 +1,55 @@
+# This file contains the fastlane.tools configuration
+# You can find the documentation at https://docs.fastlane.tools
+#
+# For a list of all available actions, check out
+#
+#     https://docs.fastlane.tools/actions
+#
+# For a list of all available plugins, check out
+#
+#     https://docs.fastlane.tools/plugins/available-plugins
+#
+
+# Uncomment the line if you want fastlane to automatically update itself
+# update_fastlane
+
+default_platform(:android)
+
+platform :android do
+  before_all do
+    setup_circle_ci
+  end
+
+  desc "Submit a new Beta Build to Crashlytics Beta"
+  lane :beta do
+    commit = last_git_commit
+    last_hash = commit[:abbreviated_commit_hash]
+    changelog_from_git_commits(
+      between: [last_hash, "HEAD"],
+      merge_commit_filtering: "only_include_merges"
+    )
+    gradle(task: "assembleRelease")
+    crashlytics
+
+    firebase_app_distribution(
+      app: "1:249850354409:android:80b4c1c342a199f6b36e78",
+      testers: "praveen@studiographene.com",
+      firebase_cli_path: "/usr/local/bin/firebase",
+      firebase_cli_token: "1//0cKQQoicKG6HsCgYIARAAGAwSNwF-L9Irc81rFn1bB1dQiQ2dSZAiA_Ma-gh97TBbymUfIQa3IoLoiA3kO2cqonmSccXEbeDMUNo"
+  )
+  
+    # sh "your_script.sh"
+    # You can also use other beta testing services here
+  end
+
+  lane :build do
+    # build the release variant
+    build_android_app(task: "assembleRelease")
+  end
+
+  # desc "Deploy a new version to the Google Play"
+  # lane :deploy do
+  #   gradle(task: "clean assembleRelease")
+  #   upload_to_play_store
+  # end
+end
