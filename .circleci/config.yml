@@ -177,15 +177,10 @@ jobs:
           name: Overwrite application name and version
           command: |
             if [ << parameters.environment >> = 'dev' ]; then
-              rpl canopyselva canopyselvaberylliumdev app/build.gradle
-              rpl go.canopy.rent "go.selva.beryllium.canopy.rent" app/src/main/AndroidManifest.xml
               rpl CircleCiTest "CircleCiTest Dev" app/src/main/res/values/strings.xml
             else
               echo $SNAP_FIREBASE_ANDROID > app/google-services.json
-              rpl canopyselva canopyselvasnap app/build.gradle
-              rpl Canopy "Snap Canopy" app/src/main/res/values/strings.xml
-              rpl app.canopy.rent "selva.snap.canopy.rent" app/src/main/AndroidManifest.xml
-              rpl go.canopy.rent "go.selva.snap.canopy.rent" app/src/main/AndroidManifest.xml
+              rpl CircleCiTest "CircleCiTest Release" app/src/main/res/values/strings.xml
             fi
           working_directory: android
       - run:
